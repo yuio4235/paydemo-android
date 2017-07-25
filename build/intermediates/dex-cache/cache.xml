@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<items version="2" >
+
+    <item
+        is-multidex="true"
+        jar="/Users/danny/Downloads/demos/PayDemo/app/libs/LinkedME-Android-Deep-Linking-SDK-V1.0.12.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="25.0.2"
+        sha1="4979be418f8ca009c66a59eeb7dc7502af7c1925">
+        <dex dex="/Users/danny/Downloads/demos/PayDemo/app/build/intermediates/transforms/dex/debug/folders/1000/2/LinkedME-Android-Deep-Linking-SDK-V1.0.12_9aa530a2d610f2fc4afa901937e841013705255d/classes.dex" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="/Users/danny/Downloads/demos/PayDemo/app/build/intermediates/incremental-runtime-classes/debug/instant-run.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="25.0.2"
+        sha1="510aa6efc159983dfbffa676a0dae37568c0a46f">
+        <dex dex="/Users/danny/Downloads/demos/PayDemo/app/build/intermediates/transforms/dex/debug/folders/1000/10000/instant-run_e671f4a520a243d41884db54bff349fdb7b6dc6e/classes.dex" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="/Users/danny/Downloads/demos/PayDemo/app/libs/LinkedME-Android-Deep-Linking-SDK-V1.0.12.jar"
+        jumboMode="false"
+        optimize="true"
+        revision="25.0.2"
+        sha1="4979be418f8ca009c66a59eeb7dc7502af7c1925">
+        <dex dex="/Users/danny/Downloads/demos/PayDemo/app/build/intermediates/pre-dexed/release/LinkedME-Android-Deep-Linking-SDK-V1.0.12_9aa530a2d610f2fc4afa901937e841013705255d.jar" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="/Users/danny/Downloads/demos/PayDemo/app/build/intermediates/incremental-classes/debug/instant-run-bootstrap.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="25.0.2"
+        sha1="f597e2c36ae0df6908893398b5fc3010b48394c0">
+        <dex dex="/Users/danny/Downloads/demos/PayDemo/app/build/intermediates/transforms/dex/debug/folders/1000/10000/instant-run-bootstrap_c14ab1784e6e94a3820789e996093f4d0802b7a9/classes.dex" />
+    </item>
+
+</items>
