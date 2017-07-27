@@ -248,15 +248,8 @@ public class PayActivity extends Activity  implements View.OnClickListener{
 
                 String sign = SignUtil.getLsPaySign(fields, appSecret);
 
-                JSONObject dataJson = new JSONObject();
-                try {
 
-                    dataJson.put("appKey", appKey);
-                    dataJson.put("trx_id", trx_id);
-                    dataJson.put("paymentType", paymentType);
-                    dataJson.put("totalAmount", totalAmount);
-                    dataJson.put("currency", currency);
-                    dataJson.put("sign", sign);
+                try {
 
                     URL mUrl = new URL("http://ls.pullmi.cn/payment/gateway");
                     HttpURLConnection httpConn = (HttpURLConnection) mUrl.openConnection();
