@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.icu.util.Output;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -20,11 +21,14 @@ import android.widget.Toast;
 
 import com.microquation.linkedme.android.LinkedME;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -50,6 +54,9 @@ public class PayActivity extends Activity  implements View.OnClickListener{
     private ImageView payBtn;
 
     private ImageView aliPayBtn;
+
+    private static final String appKey = "TZYJ9LQUYYXG087";
+    private static final String appSecret = "TZYJ9LQUYYXG087";
 
     private Handler mHandler = new Handler(){
         @Override
@@ -152,9 +159,27 @@ public class PayActivity extends Activity  implements View.OnClickListener{
     @Override
     public void onClick(View v) {
 
-        String appKey = "TZYJ9LQUYYXG087";
-        String appSecret = "TZYJ9LQUYYXG087";
 
+
+        switch (v.getId()) {
+
+            case R.id.payBtn:
+                doWxPay();
+                break;
+
+            case R.id.aliPayBtn:
+                //alipay need post
+                doAliPay();
+
+                break;
+
+            default:
+                break;
+        }
+
+    }
+
+    private void doWxPay() {
         String trx_id = String.format("%s%s", appKey, new SimpleDateFormat("yyyyMMddHHmmssSSS").format(new Date()));
 
         Map<String, String> fields = new HashMap<String, String>();
@@ -164,56 +189,127 @@ public class PayActivity extends Activity  implements View.OnClickListener{
 
         String sign = SignUtil.getLsPaySign(fields, appSecret);
 
-        switch (v.getId()) {
+        final String payUrl = String.format("http://ls.pullmi.cn/wechat_quick_pay_ticket?appKey=%s&trx_id=%s&totalAmount=0.01&sign=%s", appKey, trx_id, sign);
 
-            case R.id.payBtn:
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                URL url = null;
+                try {
+                    url = new URL(payUrl);
 
-                final String payUrl = String.format("http://ls.pullmi.cn/wechat_quick_pay_ticket?appKey=%s&trx_id=%s&totalAmount=0.01&sign=%s", appKey, trx_id, sign);
+                    HttpURLConnection urlConn = (HttpURLConnection) url.openConnection();
+                    urlConn.connect();
 
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        URL url = null;
-                        try {
-                            url = new URL(payUrl);
+                    String line = null;
+                    StringBuilder respBuilder = new StringBuilder();
 
-                            HttpURLConnection urlConn = (HttpURLConnection) url.openConnection();
-                            urlConn.connect();
+                    BufferedReader br = new BufferedReader(new InputStreamReader(urlConn.getInputStream()));
 
-                            String line = null;
-                            StringBuilder respBuilder = new StringBuilder();
-
-                            BufferedReader br = new BufferedReader(new InputStreamReader(urlConn.getInputStream()));
-
-                            while ((line = br.readLine()) != null) {
-                                respBuilder.append(line);
-                            }
-
-                            Log.e("Main", "--------> " + respBuilder.toString());
-
-                            Uri uri = Uri.parse(respBuilder.toString());
-                            Intent intent = new Intent(Intent.ACTION_VIEW,uri);
-                            startActivity(intent);
-
-                        } catch (MalformedURLException e) {
-                            e.printStackTrace();
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
+                    while ((line = br.readLine()) != null) {
+                        respBuilder.append(line);
                     }
-                }).start();
 
-                break;
+                    Log.e("Main", "--------> " + respBuilder.toString());
 
-            case R.id.aliPayBtn:
+                    Uri uri = Uri.parse(respBuilder.toString());
+                    Intent intent = new Intent(Intent.ACTION_VIEW,uri);
+                    startActivity(intent);
+
+                } catch (MalformedURLException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
+    }
+
+    private void doAliPay() {
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+
+                String trx_id = String.format("%s%s", appKey, new SimpleDateFormat("yyyyMMddHHmmssSSS").format(new Date()));
+
+                String paymentType = "antpay_qr";
+
+                String totalAmount = "1.00";
+
+                String currency = "CNY";
+
+                Map<String, String> fields = new HashMap<String, String>();
+                fields.put("appKey", appKey);
+                fields.put("trx_id", trx_id);
+                fields.put("totalAmount", totalAmount);
+                fields.put("paymentType", paymentType);
+                fields.put("currency", currency);
+
+                String sign = SignUtil.getLsPaySign(fields, appSecret);
+
+                JSONObject dataJson = new JSONObject();
+                try {
+
+                    dataJson.put("appKey", appKey);
+                    dataJson.put("trx_id", trx_id);
+                    dataJson.put("paymentType", paymentType);
+                    dataJson.put("totalAmount", totalAmount);
+                    dataJson.put("currency", currency);
+                    dataJson.put("sign", sign);
+
+                    URL mUrl = new URL("http://ls.pullmi.cn/payment/gateway");
+                    HttpURLConnection httpConn = (HttpURLConnection) mUrl.openConnection();
+                    httpConn.setRequestMethod("POST");
+                    httpConn.setDoInput(true);
+                    httpConn.setDoOutput(true);
+
+                    //post data
+                    OutputStream os = httpConn.getOutputStream();
+                    StringBuilder dataBuilder = new StringBuilder();
+                    dataBuilder.append("appKey=" + appKey);
+                    dataBuilder.append("&");
+                    dataBuilder.append("trx_id=" + trx_id);
+                    dataBuilder.append("&");
+                    dataBuilder.append("paymentType=" + paymentType);
+                    dataBuilder.append("&");
+                    dataBuilder.append("totalAmount=" + totalAmount);
+                    dataBuilder.append("&");
+                    dataBuilder.append("currency=" + currency);
+                    dataBuilder.append("&");
+                    dataBuilder.append("sign=" + sign);
+                    os.write(dataBuilder.toString().getBytes());
+                    os.flush();
+                    os.close();
+
+                    //resp data
+                    BufferedReader br = new BufferedReader(new InputStreamReader(httpConn.getInputStream()));
+                    String line = null;
+                    StringBuilder respBuilder = new StringBuilder();
+
+                    while ((line = br.readLine()) != null) {
+                        respBuilder.append(line);
+                    }
+
+                    Log.e(TAG, respBuilder.toString());
+
+                    String code = new JSONObject(respBuilder.toString()).getString("code");
+
+                    Uri uri = Uri.parse(code);
+                    Intent intent = new Intent(Intent.ACTION_VIEW,uri);
+                    startActivity(intent);
 
 
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                } catch (MalformedURLException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
 
-                break;
+            }
 
-            default:
-                break;
-        }
-
+        }).start();
     }
 }
