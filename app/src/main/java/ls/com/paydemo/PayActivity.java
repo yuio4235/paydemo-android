@@ -15,6 +15,7 @@ import android.os.Message;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.microquation.linkedme.android.LinkedME;
@@ -46,7 +47,9 @@ public class PayActivity extends Activity  implements View.OnClickListener{
 
     public static PayActivity mInstance;
 
-    private Button payBtn;
+    private ImageView payBtn;
+
+    private ImageView aliPayBtn;
 
     private Handler mHandler = new Handler(){
         @Override
@@ -64,12 +67,13 @@ public class PayActivity extends Activity  implements View.OnClickListener{
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_pay);
 
-        payBtn = (Button) findViewById(R.id.payBtn);
+        payBtn = (ImageView) findViewById(R.id.payBtn);
         payBtn.setOnClickListener(this);
 
-        payBtn.setText("点我开始支付");
+        aliPayBtn = (ImageView) findViewById(R.id.aliPayBtn);
+        aliPayBtn.setOnClickListener(this);
 
         if (mInstance == null) {
             mInstance = PayActivity.this;
@@ -147,6 +151,7 @@ public class PayActivity extends Activity  implements View.OnClickListener{
 
     @Override
     public void onClick(View v) {
+
         String appKey = "TZYJ9LQUYYXG087";
         String appSecret = "TZYJ9LQUYYXG087";
 
@@ -159,39 +164,56 @@ public class PayActivity extends Activity  implements View.OnClickListener{
 
         String sign = SignUtil.getLsPaySign(fields, appSecret);
 
-        final String payUrl = String.format("http://ls.pullmi.cn/wechat_quick_pay_ticket?appKey=%s&trx_id=%s&totalAmount=0.01&sign=%s", appKey, trx_id, sign);
+        switch (v.getId()) {
 
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                URL url = null;
-                try {
-                    url = new URL(payUrl);
+            case R.id.payBtn:
 
-                    HttpURLConnection urlConn = (HttpURLConnection) url.openConnection();
-                    urlConn.connect();
+                final String payUrl = String.format("http://ls.pullmi.cn/wechat_quick_pay_ticket?appKey=%s&trx_id=%s&totalAmount=0.01&sign=%s", appKey, trx_id, sign);
 
-                    String line = null;
-                    StringBuilder respBuilder = new StringBuilder();
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        URL url = null;
+                        try {
+                            url = new URL(payUrl);
 
-                    BufferedReader br = new BufferedReader(new InputStreamReader(urlConn.getInputStream()));
+                            HttpURLConnection urlConn = (HttpURLConnection) url.openConnection();
+                            urlConn.connect();
 
-                    while ((line = br.readLine()) != null) {
-                        respBuilder.append(line);
+                            String line = null;
+                            StringBuilder respBuilder = new StringBuilder();
+
+                            BufferedReader br = new BufferedReader(new InputStreamReader(urlConn.getInputStream()));
+
+                            while ((line = br.readLine()) != null) {
+                                respBuilder.append(line);
+                            }
+
+                            Log.e("Main", "--------> " + respBuilder.toString());
+
+                            Uri uri = Uri.parse(respBuilder.toString());
+                            Intent intent = new Intent(Intent.ACTION_VIEW,uri);
+                            startActivity(intent);
+
+                        } catch (MalformedURLException e) {
+                            e.printStackTrace();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
                     }
+                }).start();
 
-                    Log.e("Main", "--------> " + respBuilder.toString());
+                break;
 
-                    Uri uri = Uri.parse(respBuilder.toString());
-                    Intent intent = new Intent(Intent.ACTION_VIEW,uri);
-                    startActivity(intent);
+            case R.id.aliPayBtn:
 
-                } catch (MalformedURLException e) {
-                    e.printStackTrace();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }).start();
+
+
+                break;
+
+            default:
+                break;
+        }
+
     }
 }

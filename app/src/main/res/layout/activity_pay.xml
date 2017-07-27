@@ -2,13 +2,22 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:gravity="center_vertical|center_horizontal"
-    android:background="@android:color/transparent">
+    android:orientation="vertical"
+    android:gravity="center_vertical|center_horizontal">
 
-    <Button
+
+    <ImageView
         android:id="@+id/payBtn"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:text="点击支付"
-        android:layout_gravity="center_vertical|center_horizontal"/>
+        android:layout_width="180dip"
+        android:layout_height="180dip"
+        android:layout_gravity="center_vertical|center_horizontal"
+        android:src="@mipmap/icon64_wx_logo"
+        android:layout_marginBottom="30dip"/>
+
+    <ImageView
+        android:id="@+id/aliPayBtn"
+        android:layout_width="180dip"
+        android:layout_height="180dip"
+        android:layout_gravity="center_horizontal|center_vertical"
+        android:src="@mipmap/alipay"/>
 </LinearLayout>
